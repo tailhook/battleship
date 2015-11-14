@@ -1,8 +1,10 @@
 import htmlgen, dom, strutils
 
-proc log(a: cstring) {.importc.}
+proc consolelog(a: cstring) {.importc.}
 
-log(cstring("Ships"))
+proc log(s: string)=
+    consolelog(cstring(s))
+log("Hello")
 
 const ship = "&#128674;"
 const empty = "&nbsp;"
@@ -58,26 +60,78 @@ exampleShip("ship3", 2, 3)
 exampleShip("ship2", 3, 2)
 exampleShip("ship1", 4, 1)
 
-proc bindFieldClick(field: Matrix, i,j: int): proc(event: ref TEvent)=
-    result = proc (event: ref TEvent)=
-        if field[i][j] == 0:
+proc getHSize(field: Matrix, i,j: int): int =
+    var result = 0
+
+    for k in j..10:
+        if field[i][k] == 1:
+            result += 1
+        else:
+            break
+
+    for k in countdown(j - 1, 1, 1):
+        if field[i][k] == 1:
+            result += 1
+        else:
+            break
+
+
+proc getVSize(field: Matrix, i,j: int): int =
+    var result = 0
+
+    for k in i..10:
+        if field[k][j] == 1:
+            result += 1
+        else:
+            break
+
+    for k in countdown(i - 1, 1, 1):
+        if field[k][j] == 1:
+            result += 1
+        else:
+            break
+
+proc validateField(field: Matrix): bool =
+    result = true
+    var oneCells = 4
+    var twoCells = 4
+    var threeCells = 6
+    var fourCells = 4
+    for i in 1..10:
+        for j in 1..10:
+            if field[i][j] == 0:
+                continue
             #check diagonals
             if i > 1 and j > 1 and field[i - 1][j - 1] != 0:
+                result = false
                 return
             if i < 10 and j < 10 and field[i + 1][j + 1] != 0:
+                result = false
                 return
             if i > 1 and j < 10 and field[i - 1][j + 1] != 0:
+                result = false
                 return
             if i < 10 and j > 1 and field[i + 1][j - 1] != 0:
+                result = false
                 return
-            fieldA[i][j] = 1
+            var size = max(getHSize(field, i, j), getVSize(field, i, j))
+
+
+
+proc bindFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
+    result = proc (event: ref TEvent)=
+        if field[i][j] == 0:
+            field[i][j] = 1
+            if not validateField(field):
+                field[i][j] = 0
+                return
             event.target.innerHTML = ship
         else:
-            fieldA[i][j] = 0
+            field[i][j] = 0
             event.target.innerHTML = empty
 
 
-proc drawGrid(elementid: cstring, field: Matrix) =
+proc drawGrid(elementid: cstring, field: var Matrix) =
     let el = window.document.getElementById(elementid)
     for i in 1..10:
         var row = document.createElement("div")
@@ -90,7 +144,7 @@ proc drawGrid(elementid: cstring, field: Matrix) =
             cell.innerHTML = empty
             cell.classList.add("cell")
 
-            {.emit:"`cell`.onclick=`f`;"}
+            {.emit:"`cell`.onclick=`f`; "}
 
             # cell.onclick = f
             cell.data = cstring(intToStr(i) & "_" & intToStr(j))
