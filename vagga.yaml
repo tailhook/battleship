@@ -3,21 +3,23 @@ containers:
     setup:
     - !Alpine v3.2
     - !Install [build-base]
-    - !TarInstall
-      url: http://nim-lang.org/download/nim-0.12.0.tar.xz
-      script: |
-        sh build.sh
-        sh install.sh /usr/bin
+    - &nim !Unpack
+      - - !TarInstall
+          url: http://nim-lang.org/download/nim-0.12.0.tar.xz
+          script: |
+            sh build.sh
+            sh install.sh /usr/bin
+        - !GitInstall
+          url: git://github.com/nim-lang/nimble
+          script: |
+            nim c -d:release src/nimble.nim
+            cp src/nimble /usr/bin/nimble
 
   nimu:
     setup:
     - !Ubuntu trusty
     - !Install [build-essential]
-    - !TarInstall
-      url: http://nim-lang.org/download/nim-0.12.0.tar.xz
-      script: |
-        sh build.sh
-        sh install.sh /usr/bin
+    - *nim
 
   serve:
     setup:
@@ -27,10 +29,45 @@ containers:
       path: /usr/bin
       subdir: devd-0.1-linux64
 
+  server-pkgs:
+    setup:
+    - !Container nim
+    - !Install [git]
+    - !Env HOME: /usr/lib/nimble
+    - !Sh 'nimble install -y jester sha1'
+    - !GitInstall
+      url: git://github.com/onionhammer/onion-nimrod
+      script: |
+        cd websockets
+        nimble init websockets
+        nimble install
+    environ:
+      HOME: /usr/lib/nimble
+
 commands:
   nim: !Command
     container: nim
     run: [nim]
+
+  js: !Command
+    description: Build nim -> JS
+    container: nim
+    run: [nim, js, hellojs.nim]
+
+  srv: !Command
+    description: Run websocket server
+    container: server-pkgs
+    run: [nim, c, -r, server.nim]
+
+  run: !Supervise
+    description: Run websocket server and devd
+    children:
+      devd: !Command
+        container: serve
+        run: [devd, --port=8000, .]
+      nim: !Command
+        container: server-pkgs
+        run: [nim, c, -r, server.nim]
 
   serve: !Command
     description: Serve test pages
