@@ -2,8 +2,12 @@ import htmlgen, dom, strutils
 
 proc consolelog(a: cstring) {.importc.}
 
-proc log(s: string)=
+proc log(s: string) =
     consolelog(cstring(s))
+
+proc logint(i:int) =
+    log(intToStr(i))
+
 log("Hello")
 
 const ship = "&#128674;"
@@ -61,7 +65,7 @@ exampleShip("ship2", 3, 2)
 exampleShip("ship1", 4, 1)
 
 proc getHSize(field: Matrix, i,j: int): int =
-    var result = 0
+    result = 0
 
     for k in j..10:
         if field[i][k] == 1:
@@ -77,7 +81,7 @@ proc getHSize(field: Matrix, i,j: int): int =
 
 
 proc getVSize(field: Matrix, i,j: int): int =
-    var result = 0
+    result = 0
 
     for k in i..10:
         if field[k][j] == 1:
@@ -92,9 +96,9 @@ proc getVSize(field: Matrix, i,j: int): int =
             break
 
 proc validateField(field: Matrix): bool =
-    result = true
+    result = false
     var oneCells = 4
-    var twoCells = 4
+    var twoCells = 6
     var threeCells = 6
     var fourCells = 4
     for i in 1..10:
@@ -103,20 +107,41 @@ proc validateField(field: Matrix): bool =
                 continue
             #check diagonals
             if i > 1 and j > 1 and field[i - 1][j - 1] != 0:
-                result = false
                 return
             if i < 10 and j < 10 and field[i + 1][j + 1] != 0:
-                result = false
                 return
             if i > 1 and j < 10 and field[i - 1][j + 1] != 0:
-                result = false
                 return
             if i < 10 and j > 1 and field[i + 1][j - 1] != 0:
-                result = false
                 return
             var size = max(getHSize(field, i, j), getVSize(field, i, j))
+            if size > 4:
+                return
+            if size == 4:
+                if fourCells == 0:
+                    result = false
+                    return
+                fourCells -= 1
+            if size == 3:
+                if threeCells == 0:
+                    return
+                threeCells -= 1
+            if size == 2:
+                if twoCells == 0:
+                    return
+                twoCells -= 1
+            if size == 1:
+                if oneCells == 0:
+                    return
+                oneCells -= 1
+    result = true
 
-
+proc isFilled(field: Matrix): bool =
+    var sum = 0
+    for i in 1..10:
+        for j in 1..10:
+            sum += field[i][j]
+    result = sum == 20
 
 proc bindFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
     result = proc (event: ref TEvent)=
@@ -128,10 +153,15 @@ proc bindFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
             event.target.innerHTML = ship
         else:
             field[i][j] = 0
+            if not validateField(field):
+                field[i][j] = 1
+                return
             event.target.innerHTML = empty
+        if isFilled(field):
+            log("FILLED!")
 
 
-proc drawGrid(elementid: cstring, field: var Matrix) =
+proc drawSetupGrid(elementid: cstring, field: var Matrix) =
     let el = window.document.getElementById(elementid)
     for i in 1..10:
         var row = document.createElement("div")
@@ -150,7 +180,7 @@ proc drawGrid(elementid: cstring, field: var Matrix) =
             cell.data = cstring(intToStr(i) & "_" & intToStr(j))
             el.appendChild(cell)
 
-drawGrid("playerA", fieldA)
+drawSetupGrid("playerA", fieldA)
 
 type
   WebSocket* {.importc.} = object of RootObj
