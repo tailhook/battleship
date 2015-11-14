@@ -151,3 +151,20 @@ proc drawGrid(elementid: cstring, field: var Matrix) =
             el.appendChild(cell)
 
 drawGrid("playerA", fieldA)
+
+type
+  WebSocket* {.importc.} = object of RootObj
+    onopen*: proc (event: ref TEvent) {.nimcall.}
+    send: proc(val: cstring)
+
+proc new_wsock(): WebSocket {.importc.}
+
+{.emit:""" function new_wsock() {
+    return new WebSocket('ws://localhost:8080', ['battleship'])
+    } """.}
+
+var ws: WebSocket
+ws = new_wsock()
+ws.onopen = proc(ev: ref TEvent) =
+    echo "connected"
+    ws.send("hello")

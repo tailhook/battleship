@@ -4,6 +4,7 @@ import jester
 import asyncio
 
 proc onConnected(ws: WebSocketServer, client: WebSocket, message: WebSocketMessage) =
+    echo "------ connected ------"
     ws.send(client, "hello world!")
 
 proc onMessage(ws: WebSocketServer, client: WebSocket, message: WebSocketMessage) =
@@ -26,7 +27,6 @@ dispatch.register(ws)
 
 while true:
     try:
-        var val = dispatch.poll()
-        echo "Value ", val
+        discard dispatch.poll()
     except KeyError:
-        echo "Exception"
+        echo "KeyError: ", getCurrentExceptionMsg()
