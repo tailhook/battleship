@@ -29,11 +29,20 @@ containers:
       path: /usr/bin
       subdir: devd-0.1-linux64
 
-  pkgs:
+  server-pkgs:
     setup:
     - !Container nim
     - !Install [git]
-    - !Sh 'nimble install -y jester'
+    - !Env HOME: /usr/lib/nimble
+    - !Sh 'nimble install -y jester sha1'
+    - !GitInstall
+      url: git://github.com/onionhammer/onion-nimrod
+      script: |
+        cd websockets
+        nimble init websockets
+        nimble install
+    environ:
+      HOME: /usr/lib/nimble
 
 commands:
   nim: !Command
@@ -43,6 +52,10 @@ commands:
   js: !Command
     container: nim
     run: [nim, js, hellojs.nim]
+
+  srv: !Command
+    container: server-pkgs
+    run: [nim, c, -r, server.nim]
 
   serve: !Command
     description: Serve test pages
