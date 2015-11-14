@@ -93,7 +93,7 @@ proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
             return
         if field[i][j] == cDead:
             return
-        log("Attack at [" & intToStr(i) & ", " & intToStr(i) & "]")
+        log("Attack at [" & intToStr(i) & ", " & intToStr(j) & "]")
 
 
 proc drawSetupGrid(elementid: cstring, field: var Matrix, setupFinished: proc()) =
