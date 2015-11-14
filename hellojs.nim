@@ -11,11 +11,8 @@ proc drawGrid(elementid: cstring) =
         el.appendChild(row)
         for j in 0..10:
             var cell = document.createElement("span")
-            var class: Classlist
-            new(class)
-            class.add("cell")
             cell.innerHTML = "X"
-            cell.classList = class
+            cell.classList.add("cell")
             el.appendChild(cell)
 
 drawGrid("playerA")
