@@ -15,7 +15,7 @@ const ship = "&#128674;"
 const empty = "&nbsp;"
 
 
-var fieldA: Matrix[10, 10] = [
+var playerField: Matrix[10, 10] = [
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
@@ -28,7 +28,7 @@ var fieldA: Matrix[10, 10] = [
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
 ]
 
-var fieldB: Matrix[10, 10] = [
+var enemyField: Matrix[10, 10] = [
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
@@ -40,6 +40,8 @@ var fieldB: Matrix[10, 10] = [
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
 ]
+
+var waiting_enemy_turn = false
 
 proc exampleShip(elemid:string, number: int, size: int) =
     let el = window.document.getElementById(elemid)
@@ -57,12 +59,17 @@ proc exampleShip(elemid:string, number: int, size: int) =
     row.appendChild(cell);
     el.appendChild(row);
 
-exampleShip("ship4", 1, 4)
-exampleShip("ship3", 2, 3)
-exampleShip("ship2", 3, 2)
-exampleShip("ship1", 4, 1)
+proc drawExample() =
+    exampleShip("ship4", 1, 4)
+    exampleShip("ship3", 2, 3)
+    exampleShip("ship2", 3, 2)
+    exampleShip("ship1", 4, 1)
 
-proc bindFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
+proc clearExample() =
+    let el = window.document.getElementById("rules")
+    el.innerHTML = ""
+
+proc bindSetupFieldClick(field: var Matrix, i,j: int, setupFinished: proc()): proc(event: ref TEvent)=
     result = proc (event: ref TEvent)=
         if field[i][j] == cEmpty:
             field[i][j] = cShip
@@ -77,36 +84,40 @@ proc bindFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
                 return
             event.target.innerHTML = empty
         if isFilled(field):
-            log("FILLED!")
+            log("FILLED")
+            setupFinished()
+
+proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
+    result = proc (event: ref TEvent)=
+        if waiting_enemy_turn:
+            return
+        if field[i][j] == cDead:
+            return
+        log("Attack at [" & intToStr(i) & ", " & intToStr(i) & "]")
 
 
-proc drawSetupGrid(elementid: cstring, field: var Matrix) =
+proc drawSetupGrid(elementid: cstring, field: var Matrix, setupFinished: proc()) =
     let el = window.document.getElementById(elementid)
+    el.innerHTML = ""
     for i in 1..10:
         var row = document.createElement("div")
         el.appendChild(row)
 
         for j in 1..10:
-            let f = bindFieldClick(field, i, j);
-
+            let f = bindSetupFieldClick(field, i, j, setupFinished);
             var cell = document.createElement("span")
             cell.innerHTML = empty
             cell.classList.add("cell")
-
             {.emit:"`cell`.onclick=`f`; "}
-
-            # cell.onclick = f
-            cell.data = cstring(intToStr(i) & "_" & intToStr(j))
             el.appendChild(cell)
 
 proc drawPlayerGrid(elementid: cstring, field: var Matrix) =
     let el = window.document.getElementById(elementid)
+    el.innerHTML = ""
     for i in 1..10:
         var row = document.createElement("div")
         el.appendChild(row)
-
         for j in 1..10:
-            let f = bindFieldClick(field, i, j);
             var cell = document.createElement("span")
             if field[i][j] == cShip:
                 cell.innerHTML = ship
@@ -115,8 +126,33 @@ proc drawPlayerGrid(elementid: cstring, field: var Matrix) =
             cell.classList.add("cell")
             el.appendChild(cell)
 
+proc drawEnemyGrid(elementid: cstring, field: var Matrix) =
+    let el = window.document.getElementById(elementid)
+    for i in 1..10:
+        var row = document.createElement("div")
+        el.appendChild(row)
 
-drawSetupGrid("playerA", fieldA)
+        for j in 1..10:
+            let f = bindEnemyFieldClick(field, i, j);
+            var cell = document.createElement("span")
+            if field[i][j] == cShip:
+                cell.innerHTML = ship
+            else:
+                cell.innerHTML = empty
+            cell.classList.add("cell")
+            {.emit:"`cell`.onclick=`f`; "}
+            el.appendChild(cell)
+
+proc setup(setupFinished: proc()) =
+    drawSetupGrid("player", playerField, setupFinished)
+    drawExample()
+
+proc play() =
+    clearExample()
+    drawPlayerGrid("player", playerField)
+    drawEnemyGrid("enemy", enemyField)
+
+setup(play)
 
 type
   WebSocket* {.importc.} = object of RootObj
