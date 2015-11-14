@@ -11,7 +11,7 @@ proc drawGrid(elementid: cstring) =
         el.appendChild(row)
         for j in 0..10:
             var cell = document.createElement("span")
-            cell.innerHTML = "X"
+            cell.innerHTML = "&#128674;"
             cell.classList.add("cell")
             el.appendChild(cell)
 
