@@ -10,6 +10,7 @@
     border: 1px solid black;
     font-family: Symbola;
     cursor: pointer;
+    text-align: center;
 }
 .example{
     display: inline-block;

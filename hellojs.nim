@@ -11,8 +11,10 @@ proc logint(i:int) =
 
 log("Hello")
 
-const ship = "&#128674;"
+const ship = "&#x1F6A2;"
 const empty = "&nbsp;"
+const miss = "&#x2218;"
+const hit = "&#x2620;"
 
 
 var playerField: Matrix[10, 10] = [
@@ -93,6 +95,11 @@ proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
             return
         if field[i][j] == cDead:
             return
+        if field[i][j] == cShip:
+            field[i][j] = cDead
+            event.target.innerHTML = hit
+        if field[i][j] == cEmpty:
+            event.target.innerHTML = miss
         log("Attack at [" & intToStr(i) & ", " & intToStr(j) & "]")
 
 
@@ -135,10 +142,6 @@ proc drawEnemyGrid(elementid: cstring, field: var Matrix) =
         for j in 1..10:
             let f = bindEnemyFieldClick(field, i, j);
             var cell = document.createElement("span")
-            if field[i][j] == cShip:
-                cell.innerHTML = ship
-            else:
-                cell.innerHTML = empty
             cell.classList.add("cell")
             {.emit:"`cell`.onclick=`f`; "}
             el.appendChild(cell)
@@ -150,7 +153,7 @@ proc setup(setupFinished: proc()) =
 proc play() =
     clearExample()
     drawPlayerGrid("player", playerField)
-    drawEnemyGrid("enemy", enemyField)
+    drawEnemyGrid("enemy", playerField)
 
 setup(play)
 
