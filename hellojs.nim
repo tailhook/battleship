@@ -185,16 +185,17 @@ drawSetupGrid("playerA", fieldA)
 type
   WebSocket* {.importc.} = object of RootObj
     onopen*: proc (event: ref TEvent) {.nimcall.}
+    onmessage*: proc (event: ref MessageEvent) {.nimcall.}
     send: proc(val: cstring)
+  MessageEvent {.importc.} = object of RootObj
+    data*: cstring
 
-proc new_wsock(): WebSocket {.importc.}
-
-{.emit:""" function new_wsock() {
+proc newWebsocket(): WebSocket {.importc:""" function() {
     return new WebSocket('ws://localhost:8080', ['battleship'])
-    } """.}
+    }"""}
 
-var ws: WebSocket
-ws = new_wsock()
+var ws: WebSocket = newWebsocket()
 ws.onopen = proc(ev: ref TEvent) =
-    echo "connected"
-    ws.send("hello")
+    log("connected")
+ws.onmessage = proc(ev: ref MessageEvent) =
+    log("Message", ev.data)
