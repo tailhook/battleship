@@ -42,7 +42,7 @@ proc exampleShip(elemid:string, number: int, size: int) =
     for i in 1..size:
         var row = document.createElement("div")
         var cell = document.createElement("span")
-        cell.innerHTML = empty;
+        cell.innerHTML = ship;
         cell.classList.add("cell")
         row.appendChild(cell);
         el.appendChild(row);
@@ -60,10 +60,20 @@ exampleShip("ship1", 4, 1)
 
 proc bindFieldClick(field: Matrix, i,j: int): proc(event: ref TEvent)=
     result = proc (event: ref TEvent)=
-        if fieldA[i][j] == 0:
+        if field[i][j] == 0:
+            #check diagonals
+            if i > 1 and j > 1 and field[i - 1][j - 1] != 0:
+                return
+            if i < 10 and j < 10 and field[i + 1][j + 1] != 0:
+                return
+            if i > 1 and j < 10 and field[i - 1][j + 1] != 0:
+                return
+            if i < 10 and j > 1 and field[i + 1][j - 1] != 0:
+                return
             fieldA[i][j] = 1
             event.target.innerHTML = ship
         else:
+            fieldA[i][j] = 0
             event.target.innerHTML = empty
 
 
