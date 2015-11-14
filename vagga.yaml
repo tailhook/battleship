@@ -50,12 +50,24 @@ commands:
     run: [nim]
 
   js: !Command
+    description: Build nim -> JS
     container: nim
     run: [nim, js, hellojs.nim]
 
   srv: !Command
+    description: Run websocket server
     container: server-pkgs
     run: [nim, c, -r, server.nim]
+
+  run: !Supervise
+    description: Run websocket server and devd
+    children:
+      devd: !Command
+        container: serve
+        run: [devd, --port=8000, .]
+      nim: !Command
+        container: server-pkgs
+        run: [nim, c, -r, server.nim]
 
   serve: !Command
     description: Serve test pages
