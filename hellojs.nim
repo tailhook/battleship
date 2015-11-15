@@ -1,5 +1,5 @@
 import lib, json
-import htmlgen, dom, strutils
+import htmlgen, dom, strutils, enemynames
 
 
 proc consolelog(a: cstring) {.importc.}
@@ -10,7 +10,7 @@ proc log(s: string) =
 proc logint(i:int) =
     log(intToStr(i))
 
-log("Hello")
+log("Hello" & randomName())
 
 const ship = "&#x1F6A2;"
 const empty = "&nbsp;"
