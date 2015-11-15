@@ -6,7 +6,7 @@ type Cell* = enum
 type
   Matrix* = array[1..10, array[1..10, Cell]]
 
-proc newField(): Matrix =
+proc newField*(): Matrix =
     var m: Matrix = [
         [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
         [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
@@ -33,14 +33,14 @@ proc matrixToJson*(field: Matrix): string=
 proc matrixFromJson*(raw_json: string): Matrix =
     var field = newField()
     var jField = parseJson(raw_json)
-    var i = 0
-    var j = 0
+    var i = 1
+    var j = 1
     for jRow in jField:
-        i += 1
         j = 1
         for jCell in jRow:
+            field[i][j] = Cell(jCell.getNum())
             j += 1
-            field[i + 1][j + 1] = Cell(jCell.getNum())
+        i += 1
     result = field
 
 
