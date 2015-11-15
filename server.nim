@@ -2,27 +2,27 @@ import sockets
 import websockets
 import jester
 import asyncio
+import json
 
 type Game = object of RootObj
     first*: WebSocket
     second*: WebSocket
 
 var queued: WebSocket = nil
-var games: ref Table[int, Game];
-new(games)
-var game_num: int = 0
+var games: Table[int, Game] = initTable[int, Game]()
+var game_num: int = 1
 
 
 proc onConnected(ws: WebSocketServer, client: WebSocket, message: WebSocketMessage) =
     echo "------ connected ------"
     if queued.isNil:
         queued = client
-        ws.send(client, "Okay, queued")
+        ws.send(client, pretty(%*["queued"]))
     else:
         games.add(game_num, Game(first: queued, second: client))
         game_num += 1
-        ws.send(queued, "Okay, game")
-        ws.send(client, "Okay, game")
+        ws.send(queued, pretty(%*["commenced"]))
+        ws.send(client, pretty(%*["commenced"]))
         queued = nil
 
 proc onMessage(ws: WebSocketServer, client: WebSocket, message: WebSocketMessage) =
@@ -37,9 +37,9 @@ proc onDisconnected(ws: WebSocketServer, client: WebSocket, message: WebSocketMe
         echo "checking games"
         for id, game in pairs(games):
             if game.first == client:
-                ws.send(game.second, "Oh, crap")
+                ws.send(game.second, pretty(%*["peer_disconnected"]))
             elif game.second == client:
-                ws.send(game.first, "Oh, crap")
+                ws.send(game.first, pretty(%*["peer_disconnected"]))
             del games, id
 
 echo "Running websocket test"
