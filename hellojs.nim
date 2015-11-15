@@ -34,6 +34,7 @@ ws.onopen = proc(ev: ref TEvent) =
 proc shoot(x, y: int) =
     ws.send($ %*["shoot", x, y])
 
+
 var playerField = newField()
 
 var enemyField = newField()
@@ -108,13 +109,15 @@ proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
             return
         if field[i][j] == cDead:
             return
+        if field[i][j] == cMiss:
+            return
         if field[i][j] == cShip:
             field[i][j] = cDead
         if field[i][j] == cEmpty:
             field[i][j] = cMiss
+        set_enemy_turn()
         log("Attack at [" & intToStr(i) & ", " & intToStr(j) & "]")
         shoot(i, j)
-        set_enemy_turn()
 
 proc drawSetupGrid(elementid: cstring, field: var Matrix, setupFinished: proc()) =
     let el = window.document.getElementById(elementid)
@@ -152,6 +155,7 @@ proc drawPlayerGrid(elementid: cstring, field: var Matrix) =
 
 proc drawEnemyGrid(elementid: cstring, field: var Matrix) =
     let el = window.document.getElementById(elementid)
+    el.innerHTML = ""
     for i in 1..10:
         var row = document.createElement("div")
         el.appendChild(row)
@@ -160,7 +164,14 @@ proc drawEnemyGrid(elementid: cstring, field: var Matrix) =
             let f = bindEnemyFieldClick(field, i, j);
             var cell = document.createElement("span")
             cell.classList.add("cell")
-            cell.innerHTML = empty
+            if field[i][j] == cShip:
+                cell.innerHTML = ship
+            elif field[i][j] == cEmpty:
+                cell.innerHTML = empty
+            elif field[i][j] == cDead:
+                cell.innerHTML = hit
+            else:
+                cell.innerHTML = miss
             {.emit:"`cell`.onclick=`f`; "}
             el.appendChild(cell)
 
@@ -190,15 +201,16 @@ ws.onmessage = proc(ev: ref MessageEvent) =
             playerField[x][y] = cDead
         elif incoming_kind == "miss":
             playerField[x][y] = cMiss
+            clear_enemy_turn()
         drawPlayerGrid("player", playerField)
-        waiting_enemy_turn = false
     elif message_kind == "outgoing":
-        var incoming_kind = parsed[1].getStr()
+        var outgoing_kind = parsed[1].getStr()
         var x = parsed[2].getNum()
         var y = parsed[3].getNum()
-        if incoming_kind == "hit":
+        if outgoing_kind == "hit":
             enemyField[x][y] = cDead
-        elif incoming_kind == "miss":
+            clear_enemy_turn()
+        elif outgoing_kind == "miss":
             enemyField[x][y] = cMiss
         drawEnemyGrid("enemy", enemyField)
     elif message_kind == "commenced":
@@ -213,8 +225,7 @@ ws.onmessage = proc(ev: ref MessageEvent) =
             waiting_enemy_turn = false
         elif parsed[1].getStr() == "enemy":
             waiting_enemy_turn = true
-        if player_ready:
-            clearDisclaimer()
-            drawEnemyGrid("enemy", enemyField)
+        clearDisclaimer()
+        drawEnemyGrid("enemy", enemyField)
 
 setup(play)
