@@ -10,8 +10,6 @@ proc log(s: string) =
 proc logint(i:int) =
     log(intToStr(i))
 
-log("Hello" & randomName())
-
 const ship = "&#x1F6A2;"
 const empty = "&nbsp;"
 const miss = "&#x2218;"
