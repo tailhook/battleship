@@ -59,20 +59,22 @@ commands:
     container: server-pkgs
     run: [nim, c, -r, server.nim]
 
+  serve: !Command
+    description: Serve test pages
+    container: serve
+    run: &devd
+    - devd
+    - --address=0.0.0.0
+    - --port=5000
+    - .
+
   run: !Supervise
     description: Run websocket server and devd
     children:
       devd: !Command
         container: serve
-        run: [devd, --port=8000, .]
+        run: *devd
       nim: !Command
         container: server-pkgs
         run: [nim, c, -r, server.nim]
 
-  serve: !Command
-    description: Serve test pages
-    container: serve
-    run:
-    - devd
-    - --port=8000
-    - .

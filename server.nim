@@ -46,7 +46,7 @@ echo "Running websocket test"
 
 #Choose which type of websocket to test
 
-var ws            = open("", Port(8080), isAsync=true)
+var ws            = open("", Port(5001), isAsync=true)
 ws.onConnected    = onConnected
 ws.onMessage      = onMessage
 ws.onDisconnected = onDisconnected
