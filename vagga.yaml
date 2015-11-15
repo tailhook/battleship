@@ -34,13 +34,7 @@ containers:
     - !Container nim
     - !Install [git]
     - !Env HOME: /usr/lib/nimble
-    - !Sh 'nimble install -y jester sha1'
-    - !GitInstall
-      url: git://github.com/onionhammer/onion-nimrod
-      script: |
-        cd websockets
-        nimble init websockets
-        nimble install
+    - !Sh 'nimble install -y jester sha1 https://github.com/SweepySweepers/nim-websockets.git'
     environ:
       HOME: /usr/lib/nimble
 
