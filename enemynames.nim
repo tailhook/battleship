@@ -47,7 +47,19 @@ var generals = @["David G. Farragut","David D. Porter Jr.","George Dewey",
 "Eric T. Olson","Jonathan W. Greenert","Mark P. Fitzgerald","John C. Harvey Jr.","James A. Winnefeld, Jr.",
 "Samuel J. Locklear III","William H. McRaven","Mark E. Ferguson III","Cecil D. Haney","Bruce W. Clingan","William E. Gortney",
 "John M. Richardson","Harry B. Harris Jr.","Michael S. Rogers","Michelle J. Howard","Philip S. Davidson","Scott H. Swift",
-"James F. Caldwell, Jr.","Kurt W. Tidd"]
+"James F. Caldwell, Jr.","Kurt W. Tidd", "Saigō Jūdō", "Kabayama Sukenori", "Itō Sukeyuki", "Inoue Yoshika", "Heihachirō Tōgō",
+"Yamamoto Gonnohyōe", "Prince Arisugawa Takehito", "Kawamura Sumiyoshi", "Shibayama Yahachi", "Samejima Kazunori",
+"Hidaka Sōnojō", "Kataoka Shichirō", "Kamimura Hikonojō", "Ijūin Gorō", "Dewa Shigetō", "Uryū Sotokichi", "Saitō Makoto",
+"Misu Sotarō", "Shimamura Hayao", "Katō Tomosaburō", "Yoshimatsu Shigetaro", "Fujii Kōichi", "Yashiro Rokurō",
+"Katō Sadakichi", "Yamashita Gentarō", "Nawa Matahachirou", "Murakami Kakuichi", "Prince Higashifushimi Yorihito",
+"Arima Ryōkitsu", "Yamaya Tanin", "Takarabe Takeshi", "Kuroi Teijirou", "Tochinai Sojirou", "Nomaguchi Kaneo",
+"Prince Fushimi Hiroyasu", "Kantarō Suzuki", "Isamu Takeshita", "Oguri Kozaburo", "Okada Keisuke", "Ide Kenji",
+"Kato Hiroharu", "Abo Kiyokazu", "Hyakutake Saburo", "Taniguchi Naomi", "Yamamoto Eisuke", "Ōsumi Mineo", "Yamanashi Katunoshin",
+"Kobayashi Seizo", "Nomura Kichisaburo", "Nakamura Ryozo", "Suetsugu Nobumasa", "Osami Nagano", "Takahashi Sankichi",
+"Fujita Hisanori", "Yonai Mitsumasa", "Hyakutake Gengō", "Katou Takayoshi", "Hasegawa Kiyoshi", "Oikawa Koshirō",
+"Shiozawa Kōichi", "Yoshida Zengo", "Yamamoto Isoroku", "Shimada Shigetarō", "Toyoda Teijirō", "Toyoda Soemu",
+"Koga Mineichi", "Kondō Nobutake", "Takasu Shirō", "Nomura Naokuni", "Sawamoto Yorio", "Endō Yoshikazu", "Nagumo Chūichi",
+"Takagi Takeo", "Yamagata Seigō", "Itō Seiichi", "Tsukahara Nishiozō", "Inoue Shigeyoshi"]
 
 var adjectives = @[
     "aback",
