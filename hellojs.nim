@@ -16,6 +16,23 @@ const empty = "&nbsp;"
 const miss = "&#x2218;"
 const hit = "&#x2620;"
 
+type
+  WebSocket* {.importc.} = object of RootObj
+    onopen*: proc (event: ref TEvent) {.nimcall.}
+    onmessage*: proc (event: ref MessageEvent) {.nimcall.}
+    send: proc(val: cstring)
+  MessageEvent {.importc.} = object of RootObj
+    data*: cstring
+
+proc newWebsocket(): WebSocket {.importc:""" function() {
+    return new WebSocket('ws://localhost:5001', ['battleship'])
+    }"""}
+
+var ws: WebSocket = newWebsocket()
+ws.onopen = proc(ev: ref TEvent) =
+    log("connected")
+ws.onmessage = proc(ev: ref MessageEvent) =
+    log("Message", ev.data)
 
 var playerField = newField()
 
@@ -81,13 +98,11 @@ proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
             return
         if field[i][j] == cShip:
             field[i][j] = cDead
-            event.target.innerHTML = hit
         if field[i][j] == cEmpty:
-            event.target.innerHTML = miss
+            field[i][j] = cMiss
         log("Attack at [" & intToStr(i) & ", " & intToStr(j) & "]")
         set_enemy_turn()
         {.emit:"setTimeout(`clear_enemy_turn`, 5000); "}
-
 
 
 proc drawSetupGrid(elementid: cstring, field: var Matrix, setupFinished: proc()) =
@@ -115,8 +130,12 @@ proc drawPlayerGrid(elementid: cstring, field: var Matrix) =
             var cell = document.createElement("span")
             if field[i][j] == cShip:
                 cell.innerHTML = ship
-            else:
+            elif field[i][j] == cEmpty:
                 cell.innerHTML = empty
+            elif field[i][j] == cDead:
+                cell.innerHTML = hit
+            else:
+                cell.innerHTML = miss
             cell.classList.add("cell")
             el.appendChild(cell)
 
@@ -151,23 +170,3 @@ proc play() =
     drawEnemyGrid("enemy", playerField)
 
 setup(play)
-
-
-
-type
-  WebSocket* {.importc.} = object of RootObj
-    onopen*: proc (event: ref TEvent) {.nimcall.}
-    onmessage*: proc (event: ref MessageEvent) {.nimcall.}
-    send: proc(val: cstring)
-  MessageEvent {.importc.} = object of RootObj
-    data*: cstring
-
-proc newWebsocket(): WebSocket {.importc:""" function() {
-    return new WebSocket('ws://localhost:5001', ['battleship'])
-    }"""}
-
-var ws: WebSocket = newWebsocket()
-ws.onopen = proc(ev: ref TEvent) =
-    log("connected")
-ws.onmessage = proc(ev: ref MessageEvent) =
-    log("Message", ev.data)

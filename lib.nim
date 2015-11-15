@@ -1,7 +1,7 @@
 import json
 
 type Cell* = enum
-    cEmpty, cShip, cDead
+    cEmpty, cShip, cMiss, cDead
 
 type
   Matrix* = array[1..10, array[1..10, Cell]]
