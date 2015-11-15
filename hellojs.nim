@@ -89,6 +89,12 @@ proc bindSetupFieldClick(field: var Matrix, i,j: int, setupFinished: proc()): pr
             log("FILLED")
             setupFinished()
 
+proc clear_enemy_turn()=
+    waiting_enemy_turn = false
+
+proc set_enemy_turn()=
+    waiting_enemy_turn = true
+
 proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
     result = proc (event: ref TEvent)=
         if waiting_enemy_turn:
@@ -101,6 +107,9 @@ proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
         if field[i][j] == cEmpty:
             event.target.innerHTML = miss
         log("Attack at [" & intToStr(i) & ", " & intToStr(j) & "]")
+        set_enemy_turn()
+        {.emit:"setTimeout(`clear_enemy_turn`, 5000); "}
+
 
 
 proc drawSetupGrid(elementid: cstring, field: var Matrix, setupFinished: proc()) =
@@ -143,6 +152,7 @@ proc drawEnemyGrid(elementid: cstring, field: var Matrix) =
             let f = bindEnemyFieldClick(field, i, j);
             var cell = document.createElement("span")
             cell.classList.add("cell")
+            cell.innerHTML = empty
             {.emit:"`cell`.onclick=`f`; "}
             el.appendChild(cell)
 
@@ -152,6 +162,7 @@ proc setup(setupFinished: proc()) =
 
 proc play() =
     clearExample()
+    clear_enemy_turn()
     drawPlayerGrid("player", playerField)
     drawEnemyGrid("enemy", playerField)
 
