@@ -22,17 +22,21 @@ proc newField*(): Matrix =
     result = m
 
 proc matrixToJson*(field: Matrix): string=
+    var container = newJArray()
     var jField = newJArray()
     for i in 1..10:
         var jRow = newJArray()
         for j in 1..10:
             jRow.add(newJInt(ord(field[i][j])))
         jField.add(jRow)
-    result = $jField
+    container.add(newJString("field"))
+    container.add(jField)
+    result = $container
 
 proc matrixFromJson*(raw_json: string): Matrix =
     var field = newField()
-    var jField = parseJson(raw_json)
+    var container = parseJson(raw_json)
+    var jField = container[1]
     var i = 1
     var j = 1
     for jRow in jField:
