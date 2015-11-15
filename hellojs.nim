@@ -32,6 +32,9 @@ var ws: WebSocket = newWebsocket()
 ws.onopen = proc(ev: ref TEvent) =
     log("connected")
 
+proc shoot(x, y: int) =
+    ws.send($(@[newJString("shoot"), newJInt(x), newJInt(y)]))
+
 var playerField = newField()
 
 var enemyField = newField()
@@ -99,9 +102,8 @@ proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
         if field[i][j] == cEmpty:
             field[i][j] = cMiss
         log("Attack at [" & intToStr(i) & ", " & intToStr(j) & "]")
+        shoot(i, j)
         set_enemy_turn()
-        {.emit:"setTimeout(`clear_enemy_turn`, 5000); "}
-
 
 proc drawSetupGrid(elementid: cstring, field: var Matrix, setupFinished: proc()) =
     let el = window.document.getElementById(elementid)
@@ -164,5 +166,28 @@ proc play() =
 
 ws.onmessage = proc(ev: ref MessageEvent) =
     log("Message", ev.data)
+    var parsed = parseJson($ev.data)
+    var message_kind = parsed[0].getStr()
+    if message_kind == "incoming":
+        var incoming_kind = parsed[1].getStr()
+        var x = parsed[2].getNum()
+        var y = parsed[3].getNum()
+        if incoming_kind == "hit":
+            playerField[x][y] = cDead
+        elif incoming_kind == "miss":
+            playerField[x][y] = cMiss
+        drawPlayerGrid("player", playerField)
+        waiting_enemy_turn = false
+    elif message_kind == "outgoing":
+        var incoming_kind = parsed[1].getStr()
+        var x = parsed[2].getNum()
+        var y = parsed[3].getNum()
+        if incoming_kind == "hit":
+            enemyField[x][y] = cDead
+        elif incoming_kind == "miss":
+            enemyField[x][y] = cMiss
+        drawPlayerGrid("enemy", enemyField)
+    # elif message_kind == "outgoing"
+
 
 setup(play)
