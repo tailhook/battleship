@@ -24,6 +24,8 @@ containers:
   serve:
     setup:
     - !Alpine v3.2
+    - !Sh |
+        rm /bin/bbsuid  # fails to sync :(
     - !Tar
       url: https://github.com/cortesi/devd/releases/download/v0.1/devd-0.1-linux64.tgz
       path: /usr/bin
@@ -43,6 +45,35 @@ containers:
         nimble install
     environ:
       HOME: /usr/lib/nimble
+
+  bld:
+    setup:
+    - !Container server-pkgs
+    - !Depends hellojs.nim
+    - !Depends server.nim
+    - !Sh |
+        rm /bin/bbsuid  # fails to sync :(
+    - !Tar
+      url: https://github.com/cortesi/devd/releases/download/v0.1/devd-0.1-linux64.tgz
+      path: /usr/bin
+      subdir: devd-0.1-linux64
+
+    - !EnsureDir /app
+    - !EnsureDir /app/nimcache
+    - !Sh |
+        nim js hellojs.nim
+        cp index.html /app
+        cp m.css /app
+        cp nimcache/hellojs.js /app/nimcache
+        cp -R i /app
+        nim c server.nim
+        cp server /app
+
+    - !EnsureDir /config
+    - !Sh |
+        cp config/devd.yaml /config
+        cp config/server.yaml /config
+    auto-clean: true
 
 commands:
   nim: !Command

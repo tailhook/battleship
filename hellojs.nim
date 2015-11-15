@@ -25,7 +25,7 @@ type
     data*: cstring
 
 proc newWebsocket(): WebSocket {.importc:""" function() {
-    return new WebSocket('ws://localhost:5001', ['battleship'])
+    return new WebSocket('ws://' + location.hostname + ':5001', ['battleship'])
     }"""}
 
 var ws: WebSocket = newWebsocket()
