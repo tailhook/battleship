@@ -28,6 +28,10 @@
     float: right;
 }
 
+.names{
+    font-size: 50px;
+}
+
 .cell:hover{
     background-color: #D3D3D3;
 }

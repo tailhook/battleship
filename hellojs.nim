@@ -41,6 +41,7 @@ var enemyField = newField()
 var enemy_connected = false
 var player_ready = false
 var enemy_ready = false
+var your_name = ""
 var enemy_name = ""
 var waiting_enemy_turn = true
 
@@ -201,7 +202,10 @@ ws.onmessage = proc(ev: ref MessageEvent) =
             enemyField[x][y] = cMiss
         drawEnemyGrid("enemy", enemyField)
     elif message_kind == "commenced":
-        enemy_name = parsed[1].getStr()
+        your_name = parsed[1].getStr()
+        enemy_name = parsed[2].getStr()
+        let el = document.getElementById("names")
+        el.innerHTML = your_name & " VS " & enemy_name
         enemy_connected = true
         setDisclaimer("Enemy " & enemy_name & " connected")
     elif message_kind == "start":

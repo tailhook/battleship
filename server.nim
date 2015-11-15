@@ -1,3 +1,4 @@
+import enemynames
 import sockets
 import websockets
 import jester
@@ -51,8 +52,8 @@ proc onConnected(ws: WebSocketServer, client: WebSocket, message: WebSocketMessa
             turn: pNobody,
             ))
         game_num += 1
-        ws.send(queued, pretty(%*["commenced"]))
-        ws.send(client, pretty(%*["commenced"]))
+        ws.send(queued, pretty(%*["commenced", randomAmericanName(), randomJapaneseName()]))
+        ws.send(client, pretty(%*["commenced", randomJapaneseName(), randomAmericanName()]))
         queued = nil
 
 proc findGame(client: WebSocket): (int, Party) =
