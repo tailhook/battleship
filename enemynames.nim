@@ -1,5 +1,5 @@
 import math
-var generals = @["David G. Farragut","David D. Porter Jr.","George Dewey",
+var americannames = @["David G. Farragut","David D. Porter Jr.","George Dewey",
 "Frank F. Fletcher","Thomas B. Howard","Walter C. Cowles",
 "Albert G. Winterhalter","Cameron M. Winslow","Henry T. Mayo",
 "William B. Caperton","William S. Benson","Austin M. Knight",
@@ -47,7 +47,9 @@ var generals = @["David G. Farragut","David D. Porter Jr.","George Dewey",
 "Eric T. Olson","Jonathan W. Greenert","Mark P. Fitzgerald","John C. Harvey Jr.","James A. Winnefeld, Jr.",
 "Samuel J. Locklear III","William H. McRaven","Mark E. Ferguson III","Cecil D. Haney","Bruce W. Clingan","William E. Gortney",
 "John M. Richardson","Harry B. Harris Jr.","Michael S. Rogers","Michelle J. Howard","Philip S. Davidson","Scott H. Swift",
-"James F. Caldwell, Jr.","Kurt W. Tidd", "Saigō Jūdō", "Kabayama Sukenori", "Itō Sukeyuki", "Inoue Yoshika", "Heihachirō Tōgō",
+"James F. Caldwell, Jr.","Kurt W. Tidd"]
+
+var japanesenames = @["Saigō Jūdō", "Kabayama Sukenori", "Itō Sukeyuki", "Inoue Yoshika", "Heihachirō Tōgō",
 "Yamamoto Gonnohyōe", "Prince Arisugawa Takehito", "Kawamura Sumiyoshi", "Shibayama Yahachi", "Samejima Kazunori",
 "Hidaka Sōnojō", "Kataoka Shichirō", "Kamimura Hikonojō", "Ijūin Gorō", "Dewa Shigetō", "Uryū Sotokichi", "Saitō Makoto",
 "Misu Sotarō", "Shimamura Hayao", "Katō Tomosaburō", "Yoshimatsu Shigetaro", "Fujii Kōichi", "Yashiro Rokurō",
@@ -1188,7 +1190,12 @@ var adjectives = @[
     "zonked",
 ];
 
-proc randomName*(): string =
+proc randomAmericanName*(): string =
     var adjective = adjectives[random(adjectives.len)]
-    var general = generals[random(generals.len)]
+    var general = americannames[random(americannames.len)]
+    result = adjective & " " & general
+
+proc randomJapaneseName*(): string =
+    var adjective = adjectives[random(adjectives.len)]
+    var general = japanesenames[random(japanesenames.len)]
     result = adjective & " " & general
