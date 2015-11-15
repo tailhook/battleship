@@ -14,7 +14,7 @@ type Party = enum
 type VoidParty = enum
     pNobody, pFirst, pSecond
 
-type Game = object of RootObj
+type Game = ref object of RootObj
     socks*: array[First..Second, WebSocket]
     fields*: array[First..Second, Matrix]
     filled_fields*: array[First..Second, bool]
@@ -45,7 +45,7 @@ proc onConnected(ws: WebSocketServer, client: WebSocket, message: WebSocketMessa
         games.add(game_num, Game(
             socks: [queued, client],
             fields: [newField(), newField()],
-            filled_fields: [true, true],
+            filled_fields: [false, false],
             state: Commencing,
             won: pNobody,
             turn: pNobody,
@@ -89,6 +89,35 @@ proc onMessage(ws: WebSocketServer, client: WebSocket, message: WebSocketMessage
                 game.turn = (not party).toVoid
                 ws.send(game.socks[not party], $ %*["start", "you"])
                 ws.send(game.socks[party], $ %*["start", "enemy"])
+    of "shoot":
+        let x = data[1].getNum()
+        let y = data[2].getNum()
+        let (id, party) = findGame(client)
+        if id == 0:
+            ws.send(client, $ %*["no_game_for_you"])
+            return
+        var game = games[id]
+        if game.turn != party.toVoid:
+            ws.send(client, $ %*["too_early_or_too_late"])
+            return
+        var oppo = game.socks[not party]
+        var cell = game.fields[not party][x][y]
+        case cell
+        of cEmpty:
+            ws.send(client, $ %*["outgoing", "miss", x, y])
+            ws.send(oppo, $ %*["incoming", "miss", x, y])
+            game.turn = (not party).toVoid
+            game.fields[not party][x][y] = cMiss
+            return
+        of cShip:
+            ws.send(client, $ %*["outgoing", "hit", x, y])
+            ws.send(oppo, $ %*["incoming", "hit", x, y])
+            game.fields[not party][x][y] = cDead
+            # check for win
+            return
+        of cMiss, cDead:
+            ws.send(client, $ %*["already_shooted"])
+            return
     else:
         echo "Got garbage: ", data
 

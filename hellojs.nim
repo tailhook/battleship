@@ -32,7 +32,7 @@ ws.onopen = proc(ev: ref TEvent) =
     log("connected")
 
 proc shoot(x, y: int) =
-    ws.send($(@[newJString("shoot"), newJInt(x), newJInt(y)]))
+    ws.send($ %*["shoot", x, y])
 
 var playerField = newField()
 
