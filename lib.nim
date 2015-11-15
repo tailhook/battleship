@@ -1,9 +1,48 @@
+import json
+
 type Cell* = enum
     cEmpty, cShip, cDead
 
 type
-  Matrix*[W, H: static[int]] =
-    array[1..W, array[1..H, Cell]]
+  Matrix* = array[1..10, array[1..10, Cell]]
+
+proc newField(): Matrix =
+    var m: Matrix = [
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+        [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
+    ]
+    result = m
+
+proc matrixToJson*(field: Matrix): string=
+    var jField = newJArray()
+    for i in 1..10:
+        var jRow = newJArray()
+        for j in 1..10:
+            jRow.add(newJInt(ord(field[i][j])))
+        jField.add(jRow)
+    result = $jField
+
+proc matrixFromJson*(raw_json: string): Matrix =
+    var field = newField()
+    var jField = parseJson(raw_json)
+    var i = 0
+    var j = 0
+    for jRow in jField:
+        i += 1
+        j = 1
+        for jCell in jRow:
+            j += 1
+            field[i + 1][j + 1] = Cell(jCell.getNum())
+    result = field
+
 
 proc getHSize(field: Matrix, i,j: int): int =
     result = 0

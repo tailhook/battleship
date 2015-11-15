@@ -17,7 +17,7 @@ const miss = "&#x2218;"
 const hit = "&#x2620;"
 
 
-var playerField: Matrix[10, 10] = [
+var playerField: Matrix = [
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
@@ -30,7 +30,7 @@ var playerField: Matrix[10, 10] = [
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
 ]
 
-var enemyField: Matrix[10, 10] = [
+var enemyField: Matrix = [
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
     [cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty, cEmpty],
@@ -161,12 +161,20 @@ proc setup(setupFinished: proc()) =
     drawExample()
 
 proc play() =
+    var js = matrixToJson(playerField)
+    log(js)
+    var f = matrixFromJson(js)
+    for i in 1..10:
+        for j in 1..10:
+            logint(ord(f[i][j]))
     clearExample()
     clear_enemy_turn()
     drawPlayerGrid("player", playerField)
     drawEnemyGrid("enemy", playerField)
 
 setup(play)
+
+
 
 type
   WebSocket* {.importc.} = object of RootObj
