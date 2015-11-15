@@ -1,0 +1,80 @@
+#!/bin/sh -ex
+
+VAGGA=${VAGGA:-vagga}
+
+type rsync
+type ssh
+type $VAGGA
+type awk
+
+HOST="harbor.zerogw.com"
+IMAGE_DIR="/srv/battleship/images"
+CONFIG_DIR="/srv/battleship/tmpcfg"
+
+container_name() {
+    local name="$1"
+
+    echo -n "$(basename $(dirname $(readlink .vagga/$name)))"
+    if test -n "$config_dir"; then
+        echo -n ".$(dir_hash config)"
+    fi
+}
+
+sync_container() {
+    local name="$2"
+    local fullname="$name.$VERSION"
+
+    time rsync --archive --hard-links --delete-after --stats --delay-updates \
+         --exclude-from="config/rsync_excludes" \
+        "./.vagga/$name/" \
+        --link-dest $IMAGE_DIR/${name}.latest/ \
+        "$HOST":$IMAGE_DIR/.tmp.$fullname
+
+    ssh "$HOST" sh -c "'
+        mv $IMAGE_DIR/.tmp.$fullname $IMAGE_DIR/$fullname
+        ln -snf $fullname $IMAGE_DIR/${name}.latest
+        '"
+}
+
+make_configs() {
+    local config_name="$1"
+    local tmpdir="$(mktemp -d)"
+    image="bld.$VERSION" || exit 44
+    cat <<ENDYAML > $tmpdir/battleship.yaml
+devd:
+    kind: Daemon
+    instances: 1
+    image: ${image}
+    config: /config/devd.yaml
+server:
+    kind: Daemon
+    instances: 1
+    image: ${image}
+    config: /config/server.yaml
+ENDYAML
+    chmod 755 $tmpdir
+    rsync --recursive $tmpdir/ \
+        --link-dest $CONFIG_DIR/${config_name}.latest/ \
+        "$HOST:$CONFIG_DIR/$config_name"
+    ssh "$HOST" ln -snf $config_name $CONFIG_DIR/${config_name%%.*}.latest
+    rm -rf $tmpdir
+}
+
+awk 'BEGIN {FS=".";} {printf "%s.%s.%s\n",$1,$2,$3+1 > "VERSION"}' VERSION
+VERSION=$(< VERSION)
+config_version="bld.$VERSION"
+
+$VAGGA _build "bld"
+$VAGGA _build "serve"
+
+bld_container=$(container_name bld)
+
+sync_container $bld_container bld
+
+make_configs "$config_version"
+
+ssh -t "$HOST" sh -c "'
+    set -ex
+    timestamp=\$(date -Iseconds)
+    sudo lithos_switch battleship $CONFIG_DIR/$config_version/battleship.yaml
+    '"

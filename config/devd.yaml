@@ -1,0 +1,7 @@
+user_id: 33
+group_id: 33
+executable: /usr/bin/devd
+arguments:
+- --address=0.0.0.0
+- --port=5000
+- /app
