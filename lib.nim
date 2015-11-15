@@ -34,10 +34,8 @@ proc matrixToJson*(field: Matrix): string=
     container.add(jField)
     result = $container
 
-proc matrixFromJson*(raw_json: string): Matrix =
+proc matrixFromJson*(jField: JsonNode): Matrix =
     var field = newField()
-    var container = parseJson(raw_json)
-    var jField = container[1]
     var i = 1
     var j = 1
     for jRow in jField:
