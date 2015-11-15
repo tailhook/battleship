@@ -32,6 +32,11 @@
     font-size: 50px;
 }
 
+#turn{
+    font-size: 30px;
+    display: inline-block;
+}
+
 .cell:hover{
     background-color: #D3D3D3;
 }

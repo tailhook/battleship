@@ -98,9 +98,13 @@ proc bindSetupFieldClick(field: var Matrix, i,j: int, setupFinished: proc()): pr
             setupFinished()
 
 proc clear_enemy_turn()=
+    let el = document.getElementById("turn")
+    el.innerHTML = "(SHOOT)"
     waiting_enemy_turn = false
 
 proc set_enemy_turn()=
+    let el = document.getElementById("turn")
+    el.innerHTML = "(WAIT)"
     waiting_enemy_turn = true
 
 proc bindEnemyFieldClick(field: var Matrix, i,j: int): proc(event: ref TEvent)=
@@ -222,10 +226,19 @@ ws.onmessage = proc(ev: ref MessageEvent) =
         setDisclaimer("Enemy " & enemy_name & " connected")
     elif message_kind == "start":
         if parsed[1].getStr() == "you":
-            waiting_enemy_turn = false
+            clear_enemy_turn()
         elif parsed[1].getStr() == "enemy":
-            waiting_enemy_turn = true
+            set_enemy_turn()
         clearDisclaimer()
         drawEnemyGrid("enemy", enemyField)
+    elif message_kind == "win":
+        set_enemy_turn()
+        let el = document.getElementById("names")
+        el.innerHTML = your_name & " WINS!"
+    elif message_kind == "lose":
+        set_enemy_turn()
+        let el = document.getElementById("names")
+        el.innerHTML = your_name & " LOSES!"
+
 
 setup(play)
