@@ -5,6 +5,7 @@ import jester
 import asyncio
 import json
 import lib
+import unicode
 
 type State = enum
     Commencing, Playing, Done
@@ -52,8 +53,12 @@ proc onConnected(ws: WebSocketServer, client: WebSocket, message: WebSocketMessa
             turn: pNobody,
             ))
         game_num += 1
-        ws.send(queued, pretty(%*["commenced", randomAmericanName(), randomJapaneseName()]))
-        ws.send(client, pretty(%*["commenced", randomJapaneseName(), randomAmericanName()]))
+        var amer = randomAmericanName().toRunes
+        var japa = randomJapaneseName().toRunes
+        amer[0] = amer[0].toUpper
+        japa[0] = japa[0].toUpper
+        ws.send(queued, pretty(%*["commenced", $ amer, $ japa]))
+        ws.send(client, pretty(%*["commenced", $ japa, $ amer]))
         queued = nil
 
 proc findGame(client: WebSocket): (int, Party) =

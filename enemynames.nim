@@ -1,4 +1,5 @@
 import math
+
 var americannames = @["David G. Farragut","David D. Porter Jr.","George Dewey",
 "Frank F. Fletcher","Thomas B. Howard","Walter C. Cowles",
 "Albert G. Winterhalter","Cameron M. Winslow","Henry T. Mayo",
@@ -1189,6 +1190,8 @@ var adjectives = @[
     "zippy",
     "zonked",
 ];
+
+randomize()
 
 proc randomAmericanName*(): string =
     var adjective = adjectives[random(adjectives.len)]
