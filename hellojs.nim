@@ -1,5 +1,5 @@
 import htmlgen, dom, strutils
-import lib
+import lib, json
 
 proc consolelog(a: cstring) {.importc.}
 
@@ -31,8 +31,6 @@ proc newWebsocket(): WebSocket {.importc:""" function() {
 var ws: WebSocket = newWebsocket()
 ws.onopen = proc(ev: ref TEvent) =
     log("connected")
-ws.onmessage = proc(ev: ref MessageEvent) =
-    log("Message", ev.data)
 
 var playerField = newField()
 
@@ -158,15 +156,13 @@ proc setup(setupFinished: proc()) =
     drawExample()
 
 proc play() =
-    var js = matrixToJson(playerField)
-    log(js)
-    var f = matrixFromJson(js)
-    for i in 1..10:
-        for j in 1..10:
-            logint(ord(f[i][j]))
+    ws.send(matrixToJson(playerField))
     clearExample()
     clear_enemy_turn()
     drawPlayerGrid("player", playerField)
     drawEnemyGrid("enemy", playerField)
+
+ws.onmessage = proc(ev: ref MessageEvent) =
+    log("Message", ev.data)
 
 setup(play)

@@ -21,6 +21,7 @@ proc newField*(): Matrix =
     ]
     result = m
 
+
 proc matrixToJson*(field: Matrix): string=
     var container = newJArray()
     var jField = newJArray()
