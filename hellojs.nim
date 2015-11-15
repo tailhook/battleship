@@ -235,7 +235,7 @@ ws.onmessage = proc(ev: ref MessageEvent) =
         set_enemy_turn()
         let el = document.getElementById("names")
         el.innerHTML = your_name & " WINS!"
-    elif message_kind == "lose":
+    elif message_kind == "loose":
         set_enemy_turn()
         let el = document.getElementById("names")
         el.innerHTML = your_name & " LOSES!"
