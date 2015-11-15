@@ -1,5 +1,6 @@
-import htmlgen, dom, strutils
 import lib, json
+import htmlgen, dom, strutils
+
 
 proc consolelog(a: cstring) {.importc.}
 
@@ -39,7 +40,18 @@ var playerField = newField()
 
 var enemyField = newField()
 
-var waiting_enemy_turn = false
+var enemy_connected = false
+var player_ready = false
+var enemy_ready = false
+var enemy_name = ""
+var waiting_enemy_turn = true
+
+proc setDisclaimer(message: string) =
+    let el = window.document.getElementById("disclaimer")
+    el.innerHTML = message
+
+proc clearDisclaimer() =
+    setDisclaimer("")
 
 proc exampleShip(elemid:string, number: int, size: int) =
     let el = window.document.getElementById(elemid)
@@ -154,15 +166,18 @@ proc drawEnemyGrid(elementid: cstring, field: var Matrix) =
             el.appendChild(cell)
 
 proc setup(setupFinished: proc()) =
+    setDisclaimer("Waiting for enemy...")
     drawSetupGrid("player", playerField, setupFinished)
     drawExample()
 
 proc play() =
     ws.send(matrixToJson(playerField))
     clearExample()
-    clear_enemy_turn()
     drawPlayerGrid("player", playerField)
-    drawEnemyGrid("enemy", playerField)
+    if enemy_ready:
+        drawEnemyGrid("enemy", playerField)
+    else:
+        setDisclaimer("Waiting for " & enemy_name & " to setup board...")
 
 ws.onmessage = proc(ev: ref MessageEvent) =
     log("Message", ev.data)
@@ -186,8 +201,18 @@ ws.onmessage = proc(ev: ref MessageEvent) =
             enemyField[x][y] = cDead
         elif incoming_kind == "miss":
             enemyField[x][y] = cMiss
-        drawPlayerGrid("enemy", enemyField)
-    # elif message_kind == "outgoing"
-
+        drawEnemyGrid("enemy", enemyField)
+    elif message_kind == "commenced":
+        enemy_name = parsed[1].getStr()
+        enemy_connected = true
+        setDisclaimer("Enemy " & enemy_name & " connected")
+    elif message_kind == "start":
+        if parsed[1].getStr() == "you":
+            waiting_enemy_turn = false
+        elif parsed[1].getStr() == "enemy":
+            waiting_enemy_turn = true
+        if player_ready:
+            clearDisclaimer()
+            drawEnemyGrid("enemy", enemyField)
 
 setup(play)
